@@ -37,7 +37,6 @@ public class Database {
             } else {
                 this.statement.executeUpdate(String.format("INSERT INTO SPAM (word, amount) values('%s', 1)", word));
             }
-            this.statement.executeUpdate("UPDATE COUNTER SET spam = spam + 1");
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -51,7 +50,6 @@ public class Database {
             } else {
                 this.statement.executeUpdate(String.format("INSERT INTO HAM (word, amount) values('%s', 1)", word));
             }
-            this.statement.executeUpdate("UPDATE COUNTER SET ham = ham + 1");
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -65,6 +63,22 @@ public class Database {
         }
     }
 
+    public void incrementHamCount() {
+        try {
+            this.statement.executeUpdate("UPDATE COUNTER SET ham = ham + 1");
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void incrementSpamCount() {
+        try {
+            this.statement.executeUpdate("UPDATE COUNTER SET spam = spam + 1");
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
     public int countSpam() {
         try {
             return this.statement.executeQuery("SELECT spam FROM COUNTER LIMIT 1").getInt(1);
@@ -73,19 +87,19 @@ public class Database {
         }
     }
 
-    public int countWordInHam(String word) {
+    public double countWordInHam(String word) {
         try {
             return this.statement.executeQuery(String.format("SELECT amount FROM ham WHERE word = '%s' LIMIT 1", word)).getInt(1);
         } catch (SQLException e) {
-            return 0;
+            return 0.8;
         }
     }
 
-    public int countWordInSpam(String word) {
+    public double countWordInSpam(String word) {
         try {
             return this.statement.executeQuery(String.format("SELECT amount FROM spam WHERE word = '%s' LIMIT 1", word)).getInt(1);
         } catch (SQLException e) {
-            return 0;
+            return 0.8;
         }
     }
 }
