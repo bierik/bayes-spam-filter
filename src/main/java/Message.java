@@ -34,7 +34,7 @@ public class Message extends MimeMessage {
             BodyPart bodyPart = multipart.getBodyPart(i);
 
             if (bodyPart.isMimeType("text/plain")) {
-                res = res + "\n" + bodyPart.getContent();
+                res = res + bodyPart.getContent();
             } else if (bodyPart.isMimeType("multipart/*")){
                 res = res + extractTextFromMultipart((MimeMultipart)bodyPart.getContent());
             }

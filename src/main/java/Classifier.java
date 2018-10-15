@@ -3,14 +3,25 @@ import sun.tools.jstat.Token;
 import javax.mail.MessagingException;
 import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.HashSet;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class Classifier {
 
+    class ClassificationException extends Exception {
+        ClassificationException(String msg) { super(msg); }
+    }
+
     private Database db;
+
+    /*
+        Value which indicates absence of an entry in the database
+        May be something between 0 and 1.
+        Must not be 0 because then the whole classification process fails
+        A probability of 0 turns the whole classification to 0
+
+        The Classifier::calibrate method will help to determine this value
+     */
+    private static final double ALPHA = 0.0008;
 
     public Classifier(Database db) {
         this.db = db;
@@ -18,16 +29,12 @@ public class Classifier {
 
     private void learnSpam(HashSet<String> words) {
         db.incrementSpamCount();
-        for(String word : words) {
-            db.insertSpam(word);
-        }
+        words.stream().forEach(db::insertSpam);
     }
 
     private void learnHam(HashSet<String> words) {
         db.incrementHamCount();
-        for(String word : words) {
-            db.insertHam(word);
-        }
+        words.stream().forEach(db::insertHam);
     }
 
     public void learnSpam(File file) {
@@ -52,24 +59,47 @@ public class Classifier {
         }
     }
 
-    public double classify(File file) {
+    public void calibrate() {
+
+    }
+
+    public double classify(File file) throws ClassificationException {
+        String text = "";
+
         try {
-            String text = EmlReader.read(file);
-            int spamCount = this.db.countSpam();
-            int hamCount = this.db.countHam();
-            HashSet<String> words = Tokenizer.words(text);
-            double divident = words
-                    .stream()
-                    .map(w -> this.db.countWordInSpam(w) / spamCount)
-                    .reduce(1.0, (a, b) -> a * b);
-            double divisor = words
-                    .stream()
-                    .map(w -> this.db.countWordInHam(w) / hamCount)
-                    .reduce(1.0, (a, b) -> a * b) + divident;
-            return divident / divisor;
+            text = EmlReader.read(file);
         } catch (MessagingException | IOException e) {
-            e.printStackTrace();
-            return 0;
+            throw new ClassificationException(e.getMessage());
         }
+
+        int spamCount = this.db.countSpam();
+        int hamCount = this.db.countHam();
+        HashSet<String> words = Tokenizer.words(text);
+
+        double res = 1;
+
+        for (String w : words) {
+            Integer wordInSpam = this.db.countWordInSpam(w);
+            Integer wordInHam = this.db.countWordInHam(w);
+
+            if (wordInSpam == null && wordInHam == null) {
+                continue;
+            }
+
+            double probSpam = (wordInSpam == null ? ALPHA : wordInSpam) / spamCount;
+            double probHam = (wordInHam == null ? ALPHA : wordInHam) / hamCount;
+
+            res *= probHam / probSpam;
+        }
+
+        return 1 / (1 + res);
+    }
+
+    public boolean isSpam(File file) throws ClassificationException {
+        return this.classify(file) >= 0.5;
+    }
+
+    public boolean isHam(File file) throws ClassificationException {
+        return this.classify(file) < 0.5;
     }
 }

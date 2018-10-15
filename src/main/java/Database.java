@@ -55,14 +55,6 @@ public class Database {
         }
     }
 
-    public int countHam() {
-        try {
-            return this.statement.executeQuery("SELECT ham FROM COUNTER LIMIT 1").getInt(1);
-        } catch (SQLException e) {
-            return 0;
-        }
-    }
-
     public void incrementHamCount() {
         try {
             this.statement.executeUpdate("UPDATE COUNTER SET ham = ham + 1");
@@ -79,27 +71,35 @@ public class Database {
         }
     }
 
-    public int countSpam() {
+    public Integer countHam() {
+        try {
+            return this.statement.executeQuery("SELECT ham FROM COUNTER LIMIT 1").getInt(1);
+        } catch (SQLException e) {
+            return null;
+        }
+    }
+
+    public Integer countSpam() {
         try {
             return this.statement.executeQuery("SELECT spam FROM COUNTER LIMIT 1").getInt(1);
         } catch (SQLException e) {
-            return 0;
+            return null;
         }
     }
 
-    public double countWordInHam(String word) {
+    public Integer countWordInHam(String word) {
         try {
             return this.statement.executeQuery(String.format("SELECT amount FROM ham WHERE word = '%s' LIMIT 1", word)).getInt(1);
         } catch (SQLException e) {
-            return 0.8;
+            return null;
         }
     }
 
-    public double countWordInSpam(String word) {
+    public Integer countWordInSpam(String word) {
         try {
             return this.statement.executeQuery(String.format("SELECT amount FROM spam WHERE word = '%s' LIMIT 1", word)).getInt(1);
         } catch (SQLException e) {
-            return 0.8;
+            return null;
         }
     }
 }
