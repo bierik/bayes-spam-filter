@@ -65,7 +65,7 @@ public class Main {
                 files.stream().forEach(classifier::learnHam);
                 System.out.println("Files successfully parsed");
 
-                // Command to train the database with spam files
+            // Command to train the database with spam files
             } else if (args[0].equals("trainSpam")) {
 
                 Collection<File> files = FileUtils.listFiles(input, null, true);
