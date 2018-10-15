@@ -120,11 +120,14 @@ public class Classifier {
             Integer wordInSpam = this.db.countWordInSpam(w);
             Integer wordInHam = this.db.countWordInHam(w);
 
+            // Skip the iteration if the word is neither marked as spam nor ham
             if (wordInSpam == null && wordInHam == null) {
                 continue;
             }
 
+            // Use the alpha value for spam if the word is not marked as spam
             double probSpam = (wordInSpam == null ? this.alpha : wordInSpam) / spamCount;
+            // Use the alpha value for ham if the word is not marked as ham
             double probHam = (wordInHam == null ? this.alpha : wordInHam) / hamCount;
 
             res *= probHam / probSpam;
