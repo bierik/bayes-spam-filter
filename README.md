@@ -11,6 +11,14 @@ This database is being used to classify further .eml files.
 The calibration is done using more .eml tests files which brings the alpha value to 0.0008.
 This value may be adjusted accordingly.
 
+Currently the system classified hams as follows:
+When testing 1510 files the system classifies 19 files as spam.
+This is a precision of 98.74%
+
+and spams as follows:
+When testing 222 files the system classifies 202 files as spam.
+This is a precision of 91%
+
 ## Usage
 
 There are several command for the application using command line arguments.
